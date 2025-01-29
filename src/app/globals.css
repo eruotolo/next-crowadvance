@@ -1,8 +1,35 @@
 @import 'tailwindcss';
 
 @theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+    --color-*: initial;
+    --color-negro: #000000;
+    --color-blanco: #ffffff;
+    --color-gris: #EEEEEE;
+    --color-grisclaro: #FCFCFC;
+    --color-grisoscuro: #333333;
+    --color-purpura: #9E00D4;
+    --color-celeste: #3FFFF1;
+    --color-rosa: #E706A3;
+    --color-morado: #6C62C4;
+
+    --breakpoint-*: initial;
+    --breakpoint-sm: 640px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 1024px;
+    --breakpoint-xl: 1280px;
+    --breakpoint-2xl: 1520px;
+
+    --container-*: initial;
+    --container-sm: 640px;
+    --container-md: 768px;
+    --container-lg: 1024px;
+    --container-xl: 1280px;
+    --container-2xl: 1520px;
+}
+
+body {
+    background-color: var(--color-grisclaro);
+    color: var(--color-negro);
 }
 
 /*
@@ -14,29 +41,33 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
+    p {
+        @apply text-[16px] leading-[24px] 2xl:text-[18px] 2xl:leading-[24px]
+    }
 }
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer components {
+    .navItemLinks {
+        @apply text-[14px] leading-[16px] py-[5px] mx-[10px] px-[10px] text-negro uppercase cursor-pointer hover:underline font-medium
+    }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+    .linksMobile {
+        @apply cursor-pointer uppercase text-negro text-[16px] py-[15px] font-medium hover:underline
+    }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+    .nav-header {
+        @apply bg-blanco/30 rounded-[12px] backdrop-blur-2xl
+    }
+
+    .nav-mobile {
+        @apply bg-blanco/30 rounded-[12px] backdrop-blur-2xl
+    }
+
+    .menu-mobile {
+        @apply bg-blanco/30 backdrop-blur-2xl fixed top-0 left-0 h-screen w-[100%] p-10 duration-500 ease-in-out
+    }
+
+    .icon-header {
+        @apply transition-all duration-300 ease-in-out fill-current hover:fill-[var(--color-rosa)]
+    }
 }
