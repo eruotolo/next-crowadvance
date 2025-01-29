@@ -1,5 +1,5 @@
-import nodemailer from 'nodemailer';
 import { NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
 // Reemplaza con tus credenciales SMTP de Brevo
 const SMTP_HOST = 'smtp-relay.brevo.com';
@@ -9,7 +9,7 @@ const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
 
 export async function POST(request) {
     try {
-        console.log('Data', request.body);
+        //console.log('Data:', request.body);
 
         const { name, email, phone, message } = await request.json();
 
@@ -25,7 +25,7 @@ export async function POST(request) {
 
         // Crea el correo electrónico
         const emailData = {
-            from: 'Formulario contacto CrowAdvance <web@crowadvance.com>', // Reemplaza con tu correo electrónico de envío
+            from: 'Mensaje Formulario Contacto CrowAdvance <web@crowadvance.com>', // Reemplaza con tu correo electrónico de envío
             to: 'edgardoruotolo@gmail.com',
             subject: 'Nuevo Mensaje desde la web CrowAdvance!',
             html: `
