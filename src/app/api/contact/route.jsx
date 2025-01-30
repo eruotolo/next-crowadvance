@@ -7,9 +7,13 @@ const SMTP_PORT = 587;
 const SMTP_USERNAME = process.env.SMTP_USERNAME;
 const SMTP_PASSWORD = process.env.SMTP_PASSWORD;
 
+console.log('SMTP_USERNAME:', process.env.SMTP_USERNAME);
+console.log('SMTP_PASSWORD:', process.env.SMTP_PASSWORD);
+console.log('EMAIL_CONTACT:', process.env.EMAIL_CONTACT);
+
 export async function POST(request) {
     try {
-        //console.log('Data:', request.body);
+        console.log('Data', request.body);
 
         const { name, email, phone, message } = await request.json();
 
@@ -25,26 +29,27 @@ export async function POST(request) {
 
         // Crea el correo electrónico
         const emailData = {
-            from: 'Mensaje Formulario Contacto CrowAdvance <web@crowadvance.com>', // Reemplaza con tu correo electrónico de envío
+            from: 'Formulario contacto CrowAdvance <web@crowadvance.com>', // Reemplaza con tu correo electrónico de envío
             to: 'edgardoruotolo@gmail.com',
-            subject: 'Nuevo Mensaje desde la web CrowAdvance!',
+            subject: 'Nuevo Mensaje desde la web Crow!',
             html: `
-            <p>Hola,</p>
-            <p>Tiene un nuevo mensaje de: ${name}.</p>
-            <p>Email: ${email}.</p>
-            <p>Teléfono: ${phone}.</p>
-            <p>Mensaje: ${message}.</p>
-        `,
+                <p>Hola,</p>
+                <p>Tienes un nuevo mensaje de: ${name}.</p>
+                <p>Email: ${email}.</p>
+                <p>Phone: ${phone}.</p>
+                <p>Mensaje: ${message}.</p>
+            `,
         };
 
         // Envía el correo electrónico
-        await transporter.sendMail(emailData);
+        const response = await transporter.sendMail(emailData);
+        console.log('Respuesta del servidor SMTP:', response);
 
         return NextResponse.json({ submitted: true }, { status: 200 });
     } catch (error) {
-        console.error('Error sending email', error);
+        console.error('Error detallado:', error.message, error.stack);
         return NextResponse.json(
-            { error: 'No se pudo enviar el correo electrónico' },
+            { error: 'No se pudo enviar el correo electrónico', detalle: error.message },
             { status: 500 }
         );
     }
