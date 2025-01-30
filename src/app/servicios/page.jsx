@@ -69,7 +69,7 @@ export default function Servicios() {
                         </h3>
                     </div>
                     <div className="my-[30px] flex justify-center">
-                        <h2 className="text-right text-[40px] leading-[46px] font-[700] uppercase md:text-center md:text-[56px] md:leading-[56px]">
+                        <h2 className="text-center text-[40px] leading-[46px] font-[700] uppercase md:text-[56px] md:leading-[56px]">
                             Inquietos, Muy <span className="text-rosa">Inquietos</span>
                         </h2>
                     </div>

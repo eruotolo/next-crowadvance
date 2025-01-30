@@ -98,7 +98,11 @@ export default function HeaderMobile() {
                     <div className="flex flex-col items-center py-4 pt-15">
                         <ul className="flex flex-col items-center">
                             {items.map((item) => (
-                                <li key={item.id} className="my-[13px]">
+                                <li
+                                    key={item.id}
+                                    className="my-[13px]"
+                                    onClick={() => setMenuOpen(false)}
+                                >
                                     <Link href={item.link} className="linksMobile">
                                         {item.name}
                                     </Link>

@@ -7,7 +7,7 @@ export default function Footer() {
         <footer className="bg-gris h-auto md:h-auto md:py-[10px]">
             <div className="bg-negro container mx-auto flex h-[200px] flex-col items-center px-[20px] py-[20px] md:h-auto md:px-[30px] md:py-[20px] xl:rounded-[10px]">
                 <div className="container flex flex-col items-center justify-between md:flex-row md:px-[30px] md:pb-[40px]">
-                    <div className="w-full md:w-6/2">
+                    <div className="flex w-full flex-col items-center md:w-6/2 xl:items-start">
                         <h3 className="text-rosa md:text-[20px]">¿NECESITAS AYUDA?</h3>
                         <ul className="mt-2 flex flex-col md:mt-0 md:flex-row md:pt-[5px]">
                             <li>

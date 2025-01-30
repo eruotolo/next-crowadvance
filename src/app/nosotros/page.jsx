@@ -75,7 +75,7 @@ export default function Nosotros() {
                         diferencia.
                     </p>
                 </div>
-                <div className="container mx-auto mt-[40px]">
+                <div className="container mx-auto mt-[40px] px-[20px] md:px-[32px]">
                     <div className="flex flex-col md:flex-row md:px-[32px] xl:py-6">
                         <div className="w-full pb-[30px] md:w-8/12 md:pr-[15px] md:pb-0">
                             <Image
@@ -107,14 +107,15 @@ export default function Nosotros() {
                         </h3>
                     </div>
                     <div className="my-[30px] flex justify-center">
-                        <h2 className="text-right text-[40px] leading-[46px] font-[700] uppercase md:text-center md:text-[56px] md:leading-[56px]">
+                        <h2 className="text-center text-[40px] leading-[46px] font-[700] uppercase md:text-center md:text-[56px] md:leading-[56px] xl:text-right">
                             Creciendo, Siempre <span className="text-rosa">Creciendo</span>
                         </h2>
                     </div>
-                    <div className="my-[30px] flex justify-center">
-                        <p>
+                    <div className="my-[30px] flex items-center justify-center">
+                        <p className="text-center xl:px-[260px]">
                             Nuestra pasión por innovar nos permite acompañarte en cada paso,
-                            adaptándonos a tus necesidades.
+                            adaptándonos a tus necesidades. Nos llena de orgullo caminar junto a
+                            quienes confían en nuestro trabajo.
                         </p>
                     </div>
                     <div className="mt-[60px] flex flex-wrap justify-center">
@@ -126,7 +127,7 @@ export default function Nosotros() {
             <section className="bg-gris py-[70px]">
                 <div className="container mx-auto px-[20px] md:px-[32px]">
                     <div className="grid xl:grid-cols-2">
-                        <div className="order-2 col-span-1 pt-[10px] xl:order-1 xl:pr-[200px]">
+                        <div className="order-2 col-span-1 flex flex-col items-center pt-[10px] xl:order-1 xl:items-start xl:pr-[200px]">
                             <p className="mb-[20px] xl:py-2">
                                 Buscamos la excelencia en cada aspecto de nuestros proyectos, desde
                                 la atención meticulosa a los detalles, hasta superar las
