@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-
+import Confetti from 'react-confetti';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 export default function ContactForm() {
@@ -47,6 +47,7 @@ export default function ContactForm() {
                         <h1 className="font-questrial text-negro mt-[150px] text-center text-[50px] font-semibold">
                             ¡Gracias por tu mensaje!
                         </h1>
+                        <Confetti />
                     </div>
                 </div>
             ) : (
@@ -94,13 +95,13 @@ export default function ContactForm() {
                         ></textarea>
                     </div>
                     <div className="my-[10px] w-full md:my-[15px] md:w-6/12">
-                        {/*<ReCAPTCHA
-                        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                        onChange={(value) => {
-                            // you got the token!
-                            console.log(value);
-                        }}
-                    />*/}
+                        <ReCAPTCHA
+                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                            onChange={(value) => {
+                                // you got the token!
+                                console.log(value);
+                            }}
+                        />
                     </div>
                     <div className="my-[10px] flex w-full justify-center md:my-[15px] md:w-6/12">
                         <button

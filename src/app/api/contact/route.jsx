@@ -13,7 +13,7 @@ console.log('EMAIL_CONTACT:', process.env.EMAIL_CONTACT);
 
 export async function POST(request) {
     try {
-        console.log('Data', request.body);
+        //console.log('Data', request.body);
 
         const { name, email, phone, message } = await request.json();
 
@@ -42,8 +42,9 @@ export async function POST(request) {
         };
 
         // Envía el correo electrónico
-        const response = await transporter.sendMail(emailData);
-        console.log('Respuesta del servidor SMTP:', response);
+        //const response = await transporter.sendMail(emailData);
+        //console.log('Respuesta del servidor SMTP:', response);
+        await transporter.sendMail(emailData);
 
         return NextResponse.json({ submitted: true }, { status: 200 });
     } catch (error) {
