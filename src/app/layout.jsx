@@ -1,5 +1,6 @@
 import Header from '@/components/Header/Header';
 import Footer from '@/components/Footer/Footer';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 import { Montserrat } from 'next/font/google';
 import './globals.css';
@@ -128,6 +129,7 @@ export default function RootLayout({ children }) {
                 <Header />
                 <main>{children}</main>
                 <Footer />
+                <GoogleAnalytics gaId="G-B3L5F5QHDE" />
             </body>
         </html>
     );
