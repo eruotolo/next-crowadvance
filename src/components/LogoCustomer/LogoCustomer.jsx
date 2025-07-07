@@ -25,8 +25,35 @@ export default function LogoCustomer() {
     const logoUnaSalud = '/customer/unsalud.svg';
     const logoRecobatt = '/customer/recobatt.svg';
     const logoProfisio = '/customer/profisio.svg';
+    const logoBarcoPapel = '/customer/logo-barco.png';
+    const logoExploraAraucania = '/customer/explora-laaraucania.png';
+    const logoRedLac = '/customer/logo_redlac-color.svg';
 
     const clientes = [
+        {
+            id: 27,
+            image: logoRedLac,
+            link: 'https://congreso.redlac.org/',
+            width: 194,
+            height: 50,
+            alt: 'Congreso RedLac 2025',
+        },
+        {
+            id: 26,
+            image: logoExploraAraucania,
+            link: 'https://www.explorandolaaraucania.cl/',
+            width: 94,
+            height: 90,
+            alt: 'Explora La Araucanía',
+        },
+        {
+            id: 25,
+            image: logoBarcoPapel,
+            link: 'https://www.barcodepapel.cl/',
+            width: 160,
+            height: 69,
+            alt: 'Barco de Papel',
+        },
         {
             id: 1,
             image: logoAntu,
