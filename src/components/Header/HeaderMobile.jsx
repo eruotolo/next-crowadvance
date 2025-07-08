@@ -26,6 +26,11 @@ export default function HeaderMobile() {
         },
         {
             id: 4,
+            name: 'Calculadora',
+            link: '/calculadora',
+        },
+        {
+            id: 5,
             name: 'Contacto',
             link: '/contacto',
         },

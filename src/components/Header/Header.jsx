@@ -23,6 +23,11 @@ export default function Header() {
         },
         {
             id: 4,
+            name: 'Calculadora',
+            link: '/calculadora',
+        },
+        {
+            id: 5,
             name: 'Contacto',
             link: '/contacto',
         },
