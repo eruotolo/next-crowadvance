@@ -46,236 +46,166 @@ export default function LocalROICalculator() {
         }
     };
 
-    // Lógica de cálculo MEJORADA con análisis web
+    // Lógica de cálculo MEJORADA con análisis web y costos reales de IA
     const calculateROI = async () => {
         const { type, monthlyRevenue, location, hasWebsite, websiteUrl } = formData;
 
         if (!monthlyRevenue) return;
 
-        // Si tiene website, analizarlo primero
-        let websiteScore = null;
-        if (hasWebsite && websiteUrl) {
-            websiteScore = await analyzeWebsite(websiteUrl);
-        }
+        try {
+            // Análisis paralelo: website + ROI con IA
+            const promises = [];
+            
+            // Si tiene website, analizarlo
+            if (hasWebsite && websiteUrl) {
+                promises.push(analyzeWebsite(websiteUrl));
+            } else {
+                promises.push(Promise.resolve(null));
+            }
+            
+            // Análisis ROI con IA (costos reales)
+            promises.push(
+                fetch('/api/gemini/roi-analysis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type,
+                        monthlyRevenue,
+                        location,
+                        hasWebsite,
+                        websiteUrl: websiteUrl || null,
+                    }),
+                })
+                .then(res => res.json())
+            );
 
-        // Factores de pérdida por tipo de negocio
-        const lossFactors = {
-            restaurant: {
-                base: 0.18, // 18% pérdida base
-                noDelivery: 0.08,
-                noReservas: 0.05,
-                noTuristas: 0.12,
-            },
-            hotel: {
-                base: 0.25, // 25% pérdida base
-                noBookingDirecto: 0.15,
-                noVisibilidad: 0.1,
-                noReviews: 0.08,
-            },
-            retail: {
-                base: 0.22, // 22% pérdida base
-                noEcommerce: 0.12,
-                noRedes: 0.06,
-                noSEO: 0.08,
-            },
-            services: {
-                base: 0.2, // 20% pérdida base
-                noLeads: 0.1,
-                noCredibilidad: 0.07,
-                noContacto: 0.05,
-            },
-        };
+            const [websiteScore, roiAnalysis] = await Promise.all(promises);
 
-        // Factores por ubicación (turismo)
-        const locationMultiplier = {
-            castro: 1.3, // Alto turismo
-            'puerto-montt': 1.2,
-            chiloe: 1.4, // Muy alto turismo
-            osorno: 1.1,
-            valdivia: 1.15,
-            'los-lagos': 1.2,
-        };
+            // Usar datos de la IA o fallback
+            const analysis = {
+                monthlyLoss: roiAnalysis.monthlyLoss,
+                roi: roiAnalysis.roi,
+                paybackMonths: roiAnalysis.paybackMonths,
+                websiteCost: roiAnalysis.websiteCost,
+                monthlyGain: roiAnalysis.monthlyGain,
+                yearlyGain: roiAnalysis.yearlyGain,
+                netProfit: roiAnalysis.netProfit,
+                breakdown: roiAnalysis.breakdown || [],
+                recommendations: roiAnalysis.recommendations || [],
+                marketInsights: roiAnalysis.marketInsights || {},
+                websiteAnalyzed: !!websiteScore,
+                websiteUrl: websiteUrl || null,
+            };
 
-        const businessFactor = lossFactors[type];
-        const locationFactor = locationMultiplier[location] || 1.1;
-
-        // Cálculo de pérdida mensual MEJORADO
-        let totalLossFactor = businessFactor.base;
-
-        if (!hasWebsite) {
-            // No tiene website - máxima pérdida
-            totalLossFactor +=
-                Object.values(businessFactor).reduce((a, b) => a + b, 0) - businessFactor.base;
-        } else if (websiteScore) {
-            // Tiene website - ajustar pérdida según calidad
-            const websiteQuality = websiteScore.overallScore / 100; // 0-1
-            totalLossFactor = businessFactor.base * (1 - websiteQuality * 0.8); // Mejor web = menos pérdida
-        } else {
-            // Tiene website pero no se pudo analizar
-            totalLossFactor = businessFactor.base * 0.4; // Asume website promedio
-        }
-
-        const monthlyLoss = Math.round(monthlyRevenue * totalLossFactor * locationFactor);
-
-        // Cálculo de ROI
-        const websiteCost =
-            type === 'services'
-                ? 450000
-                : type === 'hotel'
-                  ? 750000
-                  : type === 'retail'
-                    ? 650000
-                    : 550000; // CLP
-
-        const monthlyGain = monthlyLoss * 0.7; // 70% de recuperación realista
-        const paybackMonths = Math.ceil(websiteCost / monthlyGain);
-        const roi = Math.round(((monthlyGain * 12 - websiteCost) / websiteCost) * 100);
-
-        // Breakdown específico por tipo CON análisis web
-        const getBreakdown = () => {
+            // Si hay análisis de website, ajustar breakdown con problemas específicos
             if (websiteScore) {
-                // Si se analizó el sitio, usar problemas específicos detectados
-                const problems = [];
+                const websiteIssues = [];
 
                 if (websiteScore.speed < 70) {
-                    problems.push({
+                    websiteIssues.push({
                         concept: 'Sitio web muy lento (pierdes visitantes)',
-                        amount: Math.round(monthlyLoss * 0.25),
+                        amount: Math.round(analysis.monthlyLoss * 0.25),
                     });
                 }
 
                 if (websiteScore.seo < 60) {
-                    problems.push({
+                    websiteIssues.push({
                         concept: 'SEO deficiente (no apareces en Google)',
-                        amount: Math.round(monthlyLoss * 0.3),
+                        amount: Math.round(analysis.monthlyLoss * 0.3),
                     });
                 }
 
                 if (websiteScore.mobile < 70) {
-                    problems.push({
+                    websiteIssues.push({
                         concept: 'No optimizado para móviles',
-                        amount: Math.round(monthlyLoss * 0.2),
+                        amount: Math.round(analysis.monthlyLoss * 0.2),
                     });
                 }
 
                 if (!websiteScore.hasContactForm) {
-                    problems.push({
+                    websiteIssues.push({
                         concept: 'Falta formulario de contacto efectivo',
-                        amount: Math.round(monthlyLoss * 0.15),
+                        amount: Math.round(analysis.monthlyLoss * 0.15),
                     });
                 }
 
-                if (problems.length === 0) {
-                    problems.push({
-                        concept: 'Optimizaciones menores necesarias',
-                        amount: Math.round(monthlyLoss * 0.1),
-                    });
+                if (websiteIssues.length > 0) {
+                    analysis.breakdown = websiteIssues;
                 }
+            }
 
-                return problems;
-            }
-            switch (type) {
-                case 'restaurant':
-                    return [
-                        {
-                            concept: 'Turistas que no te encuentran online',
-                            amount: Math.round(monthlyLoss * 0.4),
-                        },
-                        {
-                            concept: 'Pedidos delivery perdidos',
-                            amount: Math.round(monthlyLoss * 0.25),
-                        },
-                        {
-                            concept: 'Reservas no capturadas',
-                            amount: Math.round(monthlyLoss * 0.2),
-                        },
-                        {
-                            concept: 'Falta de presencia en redes',
-                            amount: Math.round(monthlyLoss * 0.15),
-                        },
-                    ];
-                case 'hotel':
-                    return [
-                        {
-                            concept: 'Reservas directas vs. comisiones plataformas',
-                            amount: Math.round(monthlyLoss * 0.45),
-                        },
-                        {
-                            concept: 'Turistas que eligen competencia online',
-                            amount: Math.round(monthlyLoss * 0.3),
-                        },
-                        {
-                            concept: 'Falta de reviews y galería',
-                            amount: Math.round(monthlyLoss * 0.25),
-                        },
-                    ];
-                case 'retail':
-                    return [
-                        {
-                            concept: 'Ventas e-commerce perdidas',
-                            amount: Math.round(monthlyLoss * 0.4),
-                        },
-                        {
-                            concept: 'Clientes que compran online a competencia',
-                            amount: Math.round(monthlyLoss * 0.35),
-                        },
-                        {
-                            concept: 'Falta de visibilidad en búsquedas',
-                            amount: Math.round(monthlyLoss * 0.25),
-                        },
-                    ];
-                case 'services':
-                    return [
-                        {
-                            concept: 'Clientes que buscan servicios online',
-                            amount: Math.round(monthlyLoss * 0.4),
-                        },
-                        {
-                            concept: 'Falta de credibilidad profesional',
-                            amount: Math.round(monthlyLoss * 0.3),
-                        },
-                        { concept: 'Leads no capturados', amount: Math.round(monthlyLoss * 0.3) },
-                    ];
-                default:
-                    return [];
-            }
+            setAnalysis(analysis);
+            
+        } catch (error) {
+            console.error('Error en cálculo ROI:', error);
+            
+            // Fallback local si falla la IA
+            const fallbackAnalysis = calculateFallbackROI();
+            setAnalysis(fallbackAnalysis);
+        }
+    };
+
+    // Función fallback local
+    const calculateFallbackROI = () => {
+        const { type, monthlyRevenue, location, hasWebsite, websiteUrl } = formData;
+
+        const baseCosts = {
+            restaurant: 650000,
+            hotel: 950000,
+            retail: 850000,
+            services: 550000
         };
 
-        // Recomendaciones específicas
-        const getRecommendations = () => {
-            const base = [
-                `Sitio web profesional optimizado para ${location}`,
-                'SEO local para aparecer en búsquedas de la zona',
-                'Integración con redes sociales',
-            ];
-
-            switch (type) {
-                case 'restaurant':
-                    return [...base, 'Sistema de reservas online', 'Menú digital y delivery'];
-                case 'hotel':
-                    return [
-                        ...base,
-                        'Motor de reservas directo',
-                        'Galería fotográfica profesional',
-                    ];
-                case 'retail':
-                    return [...base, 'Tienda online con pagos', 'Catálogo de productos digital'];
-                case 'services':
-                    return [...base, 'Formulario de contacto optimizado', 'Portfolio de trabajos'];
-                default:
-                    return base;
-            }
+        const locationMultipliers = {
+            'castro': 1.0,
+            'puerto-montt': 1.0,
+            'chiloe': 1.0,
+            'osorno': 0.95,
+            'valdivia': 1.0,
+            'los-lagos': 1.0,
+            'otras': 0.9
         };
 
-        setAnalysis({
+        const websiteCost = Math.round(baseCosts[type] * (locationMultipliers[location] || 1.0));
+        const lossPercentage = hasWebsite ? 0.08 : 0.18;
+        const monthlyLoss = Math.round(monthlyRevenue * lossPercentage);
+        const monthlyGain = Math.round(monthlyLoss * 0.6);
+        const paybackMonths = Math.ceil(websiteCost / monthlyGain);
+        const yearlyGain = monthlyGain * 12;
+        const netProfit = yearlyGain - websiteCost;
+        const roi = Math.min(Math.round((netProfit / websiteCost) * 100), 400);
+
+        return {
             monthlyLoss,
             roi,
             paybackMonths,
-            breakdown: getBreakdown(),
-            recommendations: getRecommendations(),
-            websiteAnalyzed: !!websiteScore,
+            websiteCost,
+            monthlyGain,
+            yearlyGain,
+            netProfit,
+            breakdown: [
+                {
+                    concept: 'Clientes que no te encuentran online',
+                    amount: Math.round(monthlyLoss * 0.4)
+                },
+                {
+                    concept: 'Pérdida de credibilidad profesional',
+                    amount: Math.round(monthlyLoss * 0.3)
+                },
+                {
+                    concept: 'Competencia con mejor presencia digital',
+                    amount: Math.round(monthlyLoss * 0.3)
+                }
+            ],
+            recommendations: [
+                'Sitio web profesional y responsive',
+                'SEO local para aparecer en Google',
+                'Integración con redes sociales',
+                'Sistema de contacto efectivo'
+            ],
+            websiteAnalyzed: false,
             websiteUrl: websiteUrl || null,
-        });
+        };
     };
 
     return (
@@ -595,17 +525,43 @@ export default function LocalROICalculator() {
                                     </p>
                                 </div>
 
-                                {/* ROI */}
+                                {/* Retorno de Inversión */}
                                 <div className="mb-[30px] rounded-[8px] border-l-4 border-green-500 bg-green-50 p-[20px]">
-                                    <p className="text-[14px] font-medium text-green-700">
-                                        📈 ROI con sitio web profesional:
-                                    </p>
-                                    <p className="text-[28px] leading-[34px] font-bold text-green-800 md:text-[32px] md:leading-[38px]">
-                                        {analysis.roi}% primer año
-                                    </p>
-                                    <p className="mt-[8px] text-[12px] text-green-600">
-                                        Recuperas inversión en {analysis.paybackMonths} meses
-                                    </p>
+                                    <div className="grid gap-[15px] md:grid-cols-2">
+                                        <div>
+                                            <p className="text-[14px] font-medium text-green-700">
+                                                💰 Costo del sitio web:
+                                            </p>
+                                            <p className="text-[22px] leading-[28px] font-bold text-green-800">
+                                                ${analysis.websiteCost?.toLocaleString()} CLP
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[14px] font-medium text-green-700">
+                                                📈 Ganancia estimada año 1:
+                                            </p>
+                                            <p className="text-[22px] leading-[28px] font-bold text-green-800">
+                                                ${analysis.yearlyGain?.toLocaleString()} CLP
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-[15px] p-[15px] bg-green-100 rounded-[8px]">
+                                        <p className="text-[14px] font-medium text-green-700 mb-[8px]">
+                                            💸 Ganancia neta (después de descontar la inversión):
+                                        </p>
+                                        <p className="text-[28px] leading-[34px] font-bold text-green-800 md:text-[32px] md:leading-[38px]">
+                                            ${analysis.netProfit?.toLocaleString()} CLP
+                                        </p>
+                                        <p className="mt-[8px] text-[12px] text-green-600">
+                                            {analysis.paybackMonths <= 3 
+                                                ? `Tu inversión se paga sola en solo ${analysis.paybackMonths} meses` 
+                                                : analysis.paybackMonths <= 12
+                                                ? `Tu inversión se recupera en ${analysis.paybackMonths} meses`
+                                                : 'La inversión se recupera gradualmente en el primer año'
+                                            }
+                                        </p>
+                                    </div>
                                 </div>
 
                                 {/* Breakdown */}
