@@ -15,6 +15,7 @@ export default function LocalROICalculator() {
     const [analysis, setAnalysis] = useState(null);
     const [websiteAnalysis, setWebsiteAnalysis] = useState(null);
     const [isAnalyzingWebsite, setIsAnalyzingWebsite] = useState(false);
+    const [isCalculating, setIsCalculating] = useState(false);
 
     // Función para analizar sitio web
     const analyzeWebsite = async (url) => {
@@ -52,17 +53,19 @@ export default function LocalROICalculator() {
 
         if (!monthlyRevenue) return;
 
+        setIsCalculating(true);
+
         try {
             // Análisis paralelo: website + ROI con IA
             const promises = [];
-            
+
             // Si tiene website, analizarlo
             if (hasWebsite && websiteUrl) {
                 promises.push(analyzeWebsite(websiteUrl));
             } else {
                 promises.push(Promise.resolve(null));
             }
-            
+
             // Análisis ROI con IA (costos reales)
             promises.push(
                 fetch('/api/gemini/roi-analysis', {
@@ -75,8 +78,7 @@ export default function LocalROICalculator() {
                         hasWebsite,
                         websiteUrl: websiteUrl || null,
                     }),
-                })
-                .then(res => res.json())
+                }).then((res) => res.json())
             );
 
             const [websiteScore, roiAnalysis] = await Promise.all(promises);
@@ -135,13 +137,14 @@ export default function LocalROICalculator() {
             }
 
             setAnalysis(analysis);
-            
         } catch (error) {
             console.error('Error en cálculo ROI:', error);
-            
+
             // Fallback local si falla la IA
             const fallbackAnalysis = calculateFallbackROI();
             setAnalysis(fallbackAnalysis);
+        } finally {
+            setIsCalculating(false);
         }
     };
 
@@ -153,17 +156,17 @@ export default function LocalROICalculator() {
             restaurant: 650000,
             hotel: 950000,
             retail: 850000,
-            services: 550000
+            services: 550000,
         };
 
         const locationMultipliers = {
-            'castro': 1.0,
+            castro: 1.0,
             'puerto-montt': 1.0,
-            'chiloe': 1.0,
-            'osorno': 0.95,
-            'valdivia': 1.0,
+            chiloe: 1.0,
+            osorno: 0.95,
+            valdivia: 1.0,
             'los-lagos': 1.0,
-            'otras': 0.9
+            otras: 0.9,
         };
 
         const websiteCost = Math.round(baseCosts[type] * (locationMultipliers[location] || 1.0));
@@ -186,22 +189,22 @@ export default function LocalROICalculator() {
             breakdown: [
                 {
                     concept: 'Clientes que no te encuentran online',
-                    amount: Math.round(monthlyLoss * 0.4)
+                    amount: Math.round(monthlyLoss * 0.4),
                 },
                 {
                     concept: 'Pérdida de credibilidad profesional',
-                    amount: Math.round(monthlyLoss * 0.3)
+                    amount: Math.round(monthlyLoss * 0.3),
                 },
                 {
                     concept: 'Competencia con mejor presencia digital',
-                    amount: Math.round(monthlyLoss * 0.3)
-                }
+                    amount: Math.round(monthlyLoss * 0.3),
+                },
             ],
             recommendations: [
                 'Sitio web profesional y responsive',
                 'SEO local para aparecer en Google',
                 'Integración con redes sociales',
-                'Sistema de contacto efectivo'
+                'Sistema de contacto efectivo',
             ],
             websiteAnalyzed: false,
             websiteUrl: websiteUrl || null,
@@ -374,11 +377,36 @@ export default function LocalROICalculator() {
                                 onClick={calculateROI}
                                 disabled={
                                     !formData.monthlyRevenue ||
+                                    isCalculating ||
                                     (formData.hasWebsite && isAnalyzingWebsite)
                                 }
                                 className="bg-purpura hover:bg-rosa text-blanco flex w-full cursor-pointer items-center justify-center rounded-[8px] p-[15px] text-[16px] font-bold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                                {isAnalyzingWebsite ? (
+                                {isCalculating ? (
+                                    <span className="flex items-center justify-center">
+                                        <svg
+                                            className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                        </svg>
+                                        Calculando pérdidas...
+                                    </span>
+                                ) : isAnalyzingWebsite ? (
                                     <span className="flex items-center justify-center">
                                         <svg
                                             className="mr-3 -ml-1 h-5 w-5 animate-spin text-white"
@@ -545,21 +573,20 @@ export default function LocalROICalculator() {
                                             </p>
                                         </div>
                                     </div>
-                                    
-                                    <div className="mt-[15px] p-[15px] bg-green-100 rounded-[8px]">
-                                        <p className="text-[14px] font-medium text-green-700 mb-[8px]">
+
+                                    <div className="mt-[15px] rounded-[8px] bg-green-100 p-[15px]">
+                                        <p className="mb-[8px] text-[14px] font-medium text-green-700">
                                             💸 Ganancia neta (después de descontar la inversión):
                                         </p>
                                         <p className="text-[28px] leading-[34px] font-bold text-green-800 md:text-[32px] md:leading-[38px]">
                                             ${analysis.netProfit?.toLocaleString()} CLP
                                         </p>
                                         <p className="mt-[8px] text-[12px] text-green-600">
-                                            {analysis.paybackMonths <= 3 
-                                                ? `Tu inversión se paga sola en solo ${analysis.paybackMonths} meses` 
+                                            {analysis.paybackMonths <= 3
+                                                ? `Tu inversión se paga sola en solo ${analysis.paybackMonths} meses`
                                                 : analysis.paybackMonths <= 12
-                                                ? `Tu inversión se recupera en ${analysis.paybackMonths} meses`
-                                                : 'La inversión se recupera gradualmente en el primer año'
-                                            }
+                                                  ? `Tu inversión se recupera en ${analysis.paybackMonths} meses`
+                                                  : 'La inversión se recupera gradualmente en el primer año'}
                                         </p>
                                     </div>
                                 </div>
