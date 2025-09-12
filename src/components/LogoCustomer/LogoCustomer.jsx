@@ -28,8 +28,17 @@ export default function LogoCustomer() {
     const logoBarcoPapel = '/customer/logo-barco.png';
     const logoExploraAraucania = '/customer/explora-laaraucania.png';
     const logoRedLac = '/customer/logo_redlac-color.svg';
+    const logoAndesLodge = '/customer/logo-andes.svg';
 
     const clientes = [
+        {
+            id: 28,
+            image: logoAndesLodge,
+            link: 'https://andeslodge.cl/',
+            width: 170,
+            height: 90,
+            alt: 'Andes Lodge',
+        },
         {
             id: 27,
             image: logoRedLac,
